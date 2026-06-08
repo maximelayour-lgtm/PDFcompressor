@@ -108,20 +108,18 @@ def compress():
         stem        = Path(file.filename).stem
         output_name = f"{stem}_compressed.pdf"
 
-        return send_file(
+        response = send_file(
             str(output_path),
             as_attachment=True,
             download_name=output_name,
             mimetype="application/pdf",
-            # Headers custom pour afficher les stats côté JS
-            headers={
-                "X-Original-Size"  : str(orig_mo),
-                "X-Compressed-Size": str(final_mo),
-                "X-Reduction"      : f"{reduction:.1f}",
-                "X-Target-Hit"     : "1" if success else "0",
-                "Access-Control-Expose-Headers": "X-Original-Size,X-Compressed-Size,X-Reduction,X-Target-Hit"
-            }
         )
+        response.headers["X-Original-Size"]   = str(orig_mo)
+        response.headers["X-Compressed-Size"] = str(final_mo)
+        response.headers["X-Reduction"]       = f"{reduction:.1f}"
+        response.headers["X-Target-Hit"]      = "1" if success else "0"
+        response.headers["Access-Control-Expose-Headers"] = "X-Original-Size,X-Compressed-Size,X-Reduction,X-Target-Hit"
+        return response
 
 
 if __name__ == "__main__":
